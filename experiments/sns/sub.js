@@ -1,18 +1,28 @@
 var AWS = require('aws-sdk');
 
-console.error('key: %s', process.env.AWS_ACCESS_KEY_ID);
-console.error('secret: %s', process.env.AWS_SECRET_ACCESS_KEY);
+// args.aws_access_key_id
+// args.aws_secret_access_key
+// args.region
+exports.main = function (args) {
+  var sns = exports.createSNS(args);
+};
 
-var sns = new AWS.SNS({
-  apiVersion: '2010-03-31',
-  region: 'us-west-2'
-});
+exports.createSNS = function (args) {
+  return new AWS.SNS({
+    accessKeyId: args.aws_access_key_id,
+    secretAccessKey: args.aws_secret_access_key,
+    apiVersion: '2010-03-31',
+    region: args.region
+  });
+};
 
-function subscribe() {
+// args.topic_arn
+// args.endpoint
+exports.subscribe = function (args) {
   var options = {
-    TopicArn: '',
+    TopicArn: args,
     Protocol: 'http',
-    Endpoint: ''
+    Endpoint: args
   };
 
   sns.subscribe(options, function (err, data) {
@@ -27,4 +37,8 @@ function subscribe() {
 
     debugger;
   });
+};
+
+if (require.main === module) {
+  exports.main();
 }
