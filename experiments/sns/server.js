@@ -65,9 +65,8 @@ var server = http.createServer(function (req, res) {
 		var data = JSON.parse(postBody);
 		if (data.Type === 'SubscriptionConfirmation') {
 			console.log('Token: %s', data.Token);
-			console.log('SubscribeURL: %s', data.SubscribeURL)
+			console.log('SubscribeURL: %s', data.SubscribeURL);
 		}
-		debugger;
 	});
 
 	var body = 'hello world!';

@@ -19,9 +19,12 @@ var params = {
 	}
 };
 
-sns.publish(params, function (err, data) {
-	debugger;
+sns.publish(params, function (err) {
 	if (err) {
 		console.error(err.stack || err.message || err);
 	}
+	// data
+	// { MessageId: '8a0ba019-e563-5ab0-835e-eed2c72c12a6',
+	//   ResponseMetadata: { RequestId: 'f656981e-f7e0-5b58-9fbf-d6d5d5af234e' }
+	// }
 });
