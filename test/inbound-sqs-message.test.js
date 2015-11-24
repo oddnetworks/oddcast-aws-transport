@@ -20,8 +20,10 @@ TEST.suite(function withSNSNotification(suite) {
 		UnsubscribeURL: 'https://sns.us-west-2.amazonaws.com/' +
 										'?Action=Unsubscribe',
 		MessageAttributes: Object.freeze({
-			Type: 'String',
-			Value: '{"role":"logging"}'
+			pattern: {
+				Type: 'String',
+				Value: '{"role":"logging"}'
+			}
 		})
 	});
 	let MessageId = '67f78cd8-e937-49f8-b768-8317dca7f5bc';
@@ -49,6 +51,44 @@ TEST.suite(function withSNSNotification(suite) {
 		test('has MessageId', function (t) {
 			t.plan(1);
 			t.equal(subject.MessageId, MessageId);
+		});
+		test('has ReceiptHandle', function (t) {
+			t.plan(1);
+			t.equal(subject.ReceiptHandle, ReceiptHandle);
+		});
+		test('has MD5OfBody', function (t) {
+			t.plan(1);
+			t.equal(subject.MD5OfBody, MD5OfBody);
+		});
+		test('has Body', function (t) {
+			t.plan(1);
+			t.equal(subject.Body, Body);
+		});
+		test('has Attributes', function (t) {
+			t.plan(2);
+			t.equal(subject.Attributes.SenderId, Attributes.SenderId);
+			t.equal(subject.Attributes.SentTimestamp, Attributes.SentTimestamp);
+		});
+		test('has pattern', function (t) {
+			t.plan(1);
+			t.equal(subject.pattern.role, 'logging');
+		});
+		test('has payload', function (t) {
+			t.plan(1);
+			t.equal(subject.payload.foo, 'bar');
+		});
+		test('has toJSON()', function (t) {
+			t.plan(9);
+			var data = subject.toJSON();
+			t.equal(data.MessageId, MessageId);
+			t.equal(data.ReceiptHandle, ReceiptHandle);
+			t.equal(data.MD5OfBody, MD5OfBody);
+			t.equal(data.Body, Body);
+			t.equal(data.Attributes.SenderId, Attributes.SenderId);
+			t.equal(data.Attributes.SentTimestamp, Attributes.SentTimestamp);
+			t.equal(data.pattern.role, 'logging');
+			t.equal(data.payload.foo, 'bar');
+			t.equal(typeof data.receive, 'undefined');
 		});
 	});
 });
