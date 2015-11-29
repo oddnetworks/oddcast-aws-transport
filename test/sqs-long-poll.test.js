@@ -5,9 +5,12 @@ const BRIXX = require('brixx');
 const sinon = require('sinon');
 const TEST = require('./');
 const LongPollMixin = require('../lib/sqs-long-poll');
+const MessageMixin = require('../lib/inbound-sqs-message');
 const createLongPoll = BRIXX.factory(LongPollMixin);
 const queueURL = 'http://some.domain.net/url';
+const ReceiptHandle = 'AQEB1p0i/F99u6VbFtt7Ed48PDjQ8ybr0+xu920';
 const Body = '{"pattern":1,"payload":1}';
+const messageFactory = BRIXX.factory(MessageMixin);
 
 TEST.suite(function runTwiceWithoutError(suite) {
 	const sqs = Object.freeze({
@@ -135,6 +138,83 @@ TEST.suite(function runTwiceWithError(suite) {
 		test('error handler called with an error', function (t) {
 			t.plan(1);
 			t.equal(errors[0], error, 'throw the error');
+		});
+	});
+});
+
+TEST.suite(function deleteMessageWithoutError(suite) {
+	const sqs = Object.freeze({
+		deleteMessage: sinon.spy(function mockDeleteMessage(params, callback) {
+			// Call the callback async like the real thing.
+			setTimeout(function () {
+				callback();
+			}, 12);
+		})
+	});
+
+	const subject = createLongPoll({
+		sqs: sqs,
+		queueURL: queueURL
+	});
+
+	const message = messageFactory({
+		ReceiptHandle: ReceiptHandle
+	});
+
+	suite.before(function () {
+		subject.deleteMessage(message);
+	});
+
+	suite.test(function (test) {
+		test('sqs.deleteMessage is called once', function (t) {
+			t.plan(1);
+			t.equal(sqs.deleteMessage.callCount, 1);
+		});
+		test('sqs.deleteMessage called with', function (t) {
+			t.plan(2);
+			const params = sqs.deleteMessage.args[0][0];
+			t.equal(params.QueueURL, queueURL);
+			t.equal(params.ReceiptHandle, ReceiptHandle);
+		});
+	});
+});
+
+TEST.suite(function deleteMessageWithError(suite) {
+	const error = new Error('deleteMessageWithError');
+	const sqs = Object.freeze({
+		deleteMessage: sinon.spy(function mockDeleteMessage(params, callback) {
+			// Call the callback async like the real thing.
+			setTimeout(function () {
+				callback(error);
+			}, 12);
+		})
+	});
+
+	const subject = createLongPoll({
+		sqs: sqs,
+		queueURL: queueURL
+	});
+
+	const message = messageFactory({
+		ReceiptHandle: ReceiptHandle
+	});
+
+	const errorHandler = sinon.spy();
+
+	suite.before(function () {
+		subject.on('error', errorHandler);
+		subject.deleteMessage(message);
+	});
+
+	suite.test(function (test) {
+		test('error handler is called once', function (t) {
+			t.plan(1);
+			t.equal(errorHandler.callCount, 1);
+		});
+		test('error handler called with', function (t) {
+			t.plan(1);
+			const err = errorHandler.args[0][0];
+			t.equal(err, error);
 		});
 	});
 });
