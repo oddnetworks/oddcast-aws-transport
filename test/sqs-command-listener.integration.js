@@ -1,3 +1,5 @@
+'use strict';
+
 const test = require('tape');
 const sinon = require('sinon');
 const oddcast = require('oddcast');
