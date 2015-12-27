@@ -2,15 +2,12 @@
 
 const Promise = require('bluebird');
 const test = require('tape');
-const BRIXX = require('brixx');
 const sinon = require('sinon');
 const SQSLongPoll = require('../lib/sqs-long-poll');
-const MessageMixin = require('../lib/inbound-sqs-message');
-const createLongPoll = BRIXX.factory(SQSLongPoll);
+const SQSMessage = require('../lib/inbound-sqs-message');
 const queueURL = 'http://some.domain.net/url';
 const ReceiptHandle = 'AQEB1p0i/F99u6VbFtt7Ed48PDjQ8ybr0+xu920';
 const Body = '{"pattern":1,"payload":1}';
-const messageFactory = BRIXX.factory(MessageMixin);
 
 (function runTwiceWithoutError() {
 	const sqs = Object.freeze({
@@ -24,7 +21,7 @@ const messageFactory = BRIXX.factory(MessageMixin);
 		})
 	});
 	const errorHandler = sinon.spy();
-	const subject = createLongPoll({
+	const subject = SQSLongPoll.create({
 		sqs: sqs,
 		queueURL: queueURL
 	});
@@ -98,7 +95,7 @@ const messageFactory = BRIXX.factory(MessageMixin);
 		})
 	});
 	const messageReceivedHandler = sinon.spy();
-	const subject = createLongPoll({
+	const subject = SQSLongPoll.create({
 		sqs: sqs,
 		queueURL: queueURL
 	});
@@ -141,12 +138,12 @@ const messageFactory = BRIXX.factory(MessageMixin);
 		})
 	});
 
-	const subject = createLongPoll({
+	const subject = SQSLongPoll.create({
 		sqs: sqs,
 		queueURL: queueURL
 	});
 
-	const message = messageFactory({
+	const message = SQSMessage.create({
 		ReceiptHandle: ReceiptHandle
 	});
 
@@ -177,12 +174,12 @@ const messageFactory = BRIXX.factory(MessageMixin);
 		})
 	});
 
-	const subject = createLongPoll({
+	const subject = SQSLongPoll.create({
 		sqs: sqs,
 		queueURL: queueURL
 	});
 
-	const message = messageFactory({
+	const message = SQSMessage.create({
 		ReceiptHandle: ReceiptHandle
 	});
 
