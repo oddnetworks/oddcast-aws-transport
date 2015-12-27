@@ -1,11 +1,9 @@
 'use strict';
 
 const test = require('tape');
-const BRIXX = require('brixx');
-const MessageMixin = require('../lib/inbound-sqs-message');
+const SQSMessage = require('../lib/inbound-sqs-message');
 
 (function withSNSNotification() {
-	const createMessage = BRIXX.factory(MessageMixin);
 	const snsMessage = Object.freeze({
 		Type: 'Notification',
 		MessageId: '8a0ba019-e563-5ab0-835e-eed2c72c12a6',
@@ -36,7 +34,7 @@ const MessageMixin = require('../lib/inbound-sqs-message');
 		SentTimestamp: '1448157199780'
 	});
 
-	const subject = createMessage({
+	const subject = SQSMessage.create({
 		MessageId: MessageId,
 		ReceiptHandle: ReceiptHandle,
 		MD5OfBody: MD5OfBody,
