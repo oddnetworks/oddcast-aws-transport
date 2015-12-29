@@ -1,15 +1,14 @@
 'use strict';
-
 const Promise = require('bluebird');
 const test = require('tape');
 const sinon = require('sinon');
-const sqsCommandListener = require('../lib/sqs-command-listener');
-// const SQSLongPoll = require('../lib/sqs-long-poll');
+const SQSCommandListener = require('../lib/sqs-command-listener');
 
 const messageJSON = {};
-const messagePattern = {};
-const messagePayload = {};
+const messagePattern = {pattern: 1};
+const messagePayload = {payload: 1};
 const message = Object.freeze({
+	ReceiptHandle: 'foobarbaz',
 	pattern: messagePattern,
 	payload: messagePayload,
 	toJSON: function () {
@@ -17,318 +16,324 @@ const message = Object.freeze({
 	}
 });
 
-const createTransport = sqsCommandListener({
-	queueURL: 'foo',
-	region: 'foo',
-	accessKeyId: 'foo',
-	secretAccessKey: 'foo'
-});
-
 (function messageReceivedAndHandled() {
+	const subject = SQSCommandListener.create({
+		queueURL: 'foo',
+		region: 'foo',
+		accessKeyId: 'foo',
+		secretAccessKey: 'foo'
+	});
 	const handler = sinon.spy(function () {
 		return Promise.resolve();
 	});
-	const matcher = {
-		findSingle: sinon.spy(function () {
-			return handler;
-		})
-	};
-	const subject = createTransport(matcher);
+	subject.setHandler(handler);
 	const messageReceivedHandler = sinon.spy();
 	const messageHandledHandler = sinon.spy();
+	const messageDeletedHandler = sinon.spy();
 	const messageErrorHandler = sinon.spy();
 	const messageIgnoredHandler = sinon.spy();
+	const errorHandler = sinon.spy();
 
-	const deleteMessage = sinon.stub(subject.longPoll, 'deleteMessage');
+	function sqsDeleteMessage(params, callback) {
+		callback(null);
+	}
+
+	sinon.stub(subject.longPoll, 'start');
+	sinon.stub(subject.sqs, 'deleteMessage', sqsDeleteMessage);
 
 	test('before messageReceivedAndHandled', function (t) {
 		subject.on('message:received', messageReceivedHandler);
 		subject.on('message:handled', messageHandledHandler);
+		subject.on('message:deleted', messageDeletedHandler);
 		subject.on('message:error', messageErrorHandler);
 		subject.on('message:ignored', messageIgnoredHandler);
+		subject.on('error', errorHandler);
+		subject.resume();
 
 		subject.longPoll.emit('message:received', message);
-		Promise.delay(12).then(t.end);
+		Promise.delay(1).then(t.end);
+	});
+	test('longPoll.start() is called', function (t) {
+		t.plan(1);
+		t.equal(subject.longPoll.start.callCount, 1);
 	});
 	test('message:received is emitted', function (t) {
+		t.plan(1);
 		const arg = messageReceivedHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('matcher.findSingle is called', function (t) {
-		const arg = matcher.findSingle.args[0][0];
-		t.equal(arg, messagePattern);
-		t.end();
 	});
 	test('handler is called', function (t) {
+		t.plan(2);
 		const arg = handler.args[0][0];
-		t.equal(arg.messagePayload);
-		t.end();
+		t.equal(arg.pattern, message.pattern);
+		t.equal(arg.payload, message.payload);
 	});
 	test('message:ignored is not emitted', function (t) {
+		t.plan(1);
 		t.equal(messageIgnoredHandler.callCount, 0);
-		t.end();
 	});
 	test('deleteMessage is called', function (t) {
-		const arg = deleteMessage.args[0][0];
-		t.equal(arg, message);
-		t.end();
+		t.plan(2);
+		const params = subject.sqs.deleteMessage.firstCall.args[0];
+		t.equal(params.QueueURL, subject.queueURL);
+		t.equal(params.ReceiptHandle, message.ReceiptHandle);
 	});
 	test('message:handled is emitted', function (t) {
+		t.plan(1);
 		const arg = messageHandledHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
+	});
+	test('message:deleted is emitted', function (t) {
+		t.plan(1);
+		const arg = messageDeletedHandler.args[0][0];
+		t.equal(arg, messageJSON);
 	});
 	test('message:error is not emitted', function (t) {
 		t.equal(messageErrorHandler.callCount, 0);
 		t.end();
+	});
+	test('error is not emitted', function (t) {
+		t.plan(1);
+		t.equal(errorHandler.callCount, 0);
 	});
 })();
 
 (function messageReceivedAndNotHandled() {
+	const subject = SQSCommandListener.create({
+		queueURL: 'foo',
+		region: 'foo',
+		accessKeyId: 'foo',
+		secretAccessKey: 'foo'
+	});
 	const handler = sinon.spy(function () {
 		return Promise.resolve(false);
 	});
-	const matcher = {
-		findSingle: sinon.spy(function () {
-			return handler;
-		})
-	};
-	const subject = createTransport(matcher);
+	subject.setHandler(handler);
 	const messageReceivedHandler = sinon.spy();
 	const messageHandledHandler = sinon.spy();
+	const messageDeletedHandler = sinon.spy();
 	const messageErrorHandler = sinon.spy();
 	const messageIgnoredHandler = sinon.spy();
+	const errorHandler = sinon.spy();
 
-	const deleteMessage = sinon.stub(subject.longPoll, 'deleteMessage');
+	function sqsDeleteMessage(params, callback) {
+		callback(null);
+	}
+
+	sinon.stub(subject.longPoll, 'start');
+	sinon.stub(subject.sqs, 'deleteMessage', sqsDeleteMessage);
 
 	test('before messageReceivedAndHandled', function (t) {
 		subject.on('message:received', messageReceivedHandler);
 		subject.on('message:handled', messageHandledHandler);
+		subject.on('message:deleted', messageDeletedHandler);
 		subject.on('message:error', messageErrorHandler);
 		subject.on('message:ignored', messageIgnoredHandler);
+		subject.on('error', errorHandler);
+		subject.resume();
 
 		subject.longPoll.emit('message:received', message);
 		Promise.delay(12).then(t.end);
 	});
+	test('longPoll.start() is called', function (t) {
+		t.plan(1);
+		t.equal(subject.longPoll.start.callCount, 1);
+	});
 	test('message:received is emitted', function (t) {
+		t.plan(1);
 		const arg = messageReceivedHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('matcher.findSingle is called', function (t) {
-		const arg = matcher.findSingle.args[0][0];
-		t.equal(arg, messagePattern);
-		t.end();
 	});
 	test('handler is called', function (t) {
+		t.plan(2);
 		const arg = handler.args[0][0];
-		t.equal(arg.messagePayload);
-		t.end();
+		t.equal(arg.pattern, message.pattern);
+		t.equal(arg.payload, message.payload);
 	});
 	test('message:ignored is emitted', function (t) {
+		t.plan(1);
 		const arg = messageIgnoredHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
 	});
 	test('deleteMessage is not called', function (t) {
-		t.equal(deleteMessage.callCount, 0);
-		t.end();
+		t.plan(1);
+		t.equal(subject.sqs.deleteMessage.callCount, 0);
 	});
 	test('message:handled is not emitted', function (t) {
+		t.plan(1);
 		t.equal(messageHandledHandler.callCount, 0);
-		t.end();
+	});
+	test('message:deleted is not emitted', function (t) {
+		t.plan(1);
+		t.equal(messageDeletedHandler.callCount, 0);
 	});
 	test('message:error is not emitted', function (t) {
+		t.plan(1);
 		t.equal(messageErrorHandler.callCount, 0);
-		t.end();
+	});
+	test('error is not emitted', function (t) {
+		t.plan(1);
+		t.equal(errorHandler.callCount, 0);
 	});
 })();
 
-(function messageReceivedAndThrow() {
-	const error = new Error('TEST messageReceivedAndThrow');
-	const handler = sinon.spy(function () {
-		throw error;
-	});
-	const matcher = {
-		findSingle: sinon.spy(function () {
-			return handler;
-		})
-	};
-	const subject = createTransport(matcher);
-	const messageReceivedHandler = sinon.spy();
-	const messageHandledHandler = sinon.spy();
-	const messageErrorHandler = sinon.spy();
-	const errorHandler = sinon.spy();
-	const messageIgnoredHandler = sinon.spy();
-
-	const deleteMessage = sinon.stub(subject.longPoll, 'deleteMessage');
-
-	test('before messageReceivedAndHandled', function (t) {
-		subject.on('message:received', messageReceivedHandler);
-		subject.on('message:handled', messageHandledHandler);
-		subject.on('message:error', messageErrorHandler);
-		subject.on('error', errorHandler);
-		subject.on('message:ignored', messageIgnoredHandler);
-
-		subject.longPoll.emit('message:received', message);
-		Promise.delay(12).then(t.end);
-	});
-	test('message:received is emitted', function (t) {
-		const arg = messageReceivedHandler.args[0][0];
-		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('matcher.findSingle is called', function (t) {
-		const arg = matcher.findSingle.args[0][0];
-		t.equal(arg, messagePattern);
-		t.end();
-	});
-	test('handler is called', function (t) {
-		const arg = handler.args[0][0];
-		t.equal(arg.messagePayload);
-		t.end();
-	});
-	test('message:ignored is not emitted', function (t) {
-		t.equal(messageIgnoredHandler.callCount, 0);
-		t.end();
-	});
-	test('deleteMessage is not called', function (t) {
-		t.equal(deleteMessage.callCount, 0);
-		t.end();
-	});
-	test('message:handled is not emitted', function (t) {
-		t.equal(messageHandledHandler.callCount, 0);
-		t.end();
-	});
-	test('message:error is emitted', function (t) {
-		const arg = messageErrorHandler.args[0][0];
-		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('message:error is emitted', function (t) {
-		const arg = errorHandler.args[0][0];
-		t.equal(arg, error);
-		t.end();
-	});
-})();
-
-(function messageReceivedAndReject() {
-	const error = new Error('TEST messageReceivedAndThrow');
+(function messageReceivedAndRejected() {
+	const error = new Error('TEST messageReceivedAndRejected');
 	const handler = sinon.spy(function () {
 		return Promise.reject(error);
 	});
-	const matcher = {
-		findSingle: sinon.spy(function () {
-			return handler;
-		})
-	};
-	const subject = createTransport(matcher);
+	const subject = SQSCommandListener.create({
+		queueURL: 'foo',
+		region: 'foo',
+		accessKeyId: 'foo',
+		secretAccessKey: 'foo'
+	});
+	subject.setHandler(handler);
 	const messageReceivedHandler = sinon.spy();
 	const messageHandledHandler = sinon.spy();
+	const messageDeletedHandler = sinon.spy();
 	const messageErrorHandler = sinon.spy();
-	const errorHandler = sinon.spy();
 	const messageIgnoredHandler = sinon.spy();
+	const errorHandler = sinon.spy();
 
-	const deleteMessage = sinon.stub(subject.longPoll, 'deleteMessage');
+	function sqsDeleteMessage(params, callback) {
+		callback(null);
+	}
+
+	sinon.stub(subject.longPoll, 'start');
+	sinon.stub(subject.sqs, 'deleteMessage', sqsDeleteMessage);
 
 	test('before messageReceivedAndHandled', function (t) {
 		subject.on('message:received', messageReceivedHandler);
 		subject.on('message:handled', messageHandledHandler);
+		subject.on('message:deleted', messageDeletedHandler);
 		subject.on('message:error', messageErrorHandler);
 		subject.on('error', errorHandler);
 		subject.on('message:ignored', messageIgnoredHandler);
+		subject.resume();
 
 		subject.longPoll.emit('message:received', message);
 		Promise.delay(12).then(t.end);
 	});
+	test('longPoll.start() is called', function (t) {
+		t.plan(1);
+		t.equal(subject.longPoll.start.callCount, 1);
+	});
 	test('message:received is emitted', function (t) {
+		t.plan(1);
 		const arg = messageReceivedHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('matcher.findSingle is called', function (t) {
-		const arg = matcher.findSingle.args[0][0];
-		t.equal(arg, messagePattern);
-		t.end();
 	});
 	test('handler is called', function (t) {
+		t.plan(2);
 		const arg = handler.args[0][0];
-		t.equal(arg.messagePayload);
-		t.end();
+		t.equal(arg.pattern, message.pattern);
+		t.equal(arg.payload, message.payload);
 	});
 	test('message:ignored is not emitted', function (t) {
+		t.plan(1);
 		t.equal(messageIgnoredHandler.callCount, 0);
-		t.end();
 	});
 	test('deleteMessage is not called', function (t) {
-		t.equal(deleteMessage.callCount, 0);
-		t.end();
+		t.plan(1);
+		t.equal(subject.sqs.deleteMessage.callCount, 0);
 	});
 	test('message:handled is not emitted', function (t) {
+		t.plan(1);
 		t.equal(messageHandledHandler.callCount, 0);
-		t.end();
 	});
 	test('message:error is emitted', function (t) {
+		t.plan(1);
 		const arg = messageErrorHandler.args[0][0];
-		t.equal(arg, messageJSON);
-		t.end();
-	});
-	test('message:error is emitted', function (t) {
-		const arg = errorHandler.args[0][0];
 		t.equal(arg, error);
-		t.end();
+	});
+	test('error is not emitted', function (t) {
+		t.plan(1);
+		t.equal(errorHandler.callCount, 0);
 	});
 })();
 
-(function messageReceivedWithNoHandler() {
-	const matcher = {
-		findSingle: sinon.spy(function () {
-			return null;
-		})
-	};
-	const subject = createTransport(matcher);
+(function withSQSLongPollError() {
+	const error = new Error('TEST withSQSLongPollError');
+	const handler = sinon.spy(function () {
+		return Promise.resolve(true);
+	});
+	const subject = SQSCommandListener.create({
+		queueURL: 'foo',
+		region: 'foo',
+		accessKeyId: 'foo',
+		secretAccessKey: 'foo'
+	});
+	subject.setHandler(handler);
 	const messageReceivedHandler = sinon.spy();
 	const messageHandledHandler = sinon.spy();
+	const messageDeletedHandler = sinon.spy();
 	const messageErrorHandler = sinon.spy();
 	const messageIgnoredHandler = sinon.spy();
+	const errorHandler = sinon.spy();
 
-	const deleteMessage = sinon.stub(subject.longPoll, 'deleteMessage');
+	function sqsDeleteMessage(params, callback) {
+		callback(null);
+	}
 
-	test('before messageReceivedWithNoHandler', function (t) {
+	sinon.stub(subject.longPoll, 'start');
+	sinon.stub(subject.sqs, 'deleteMessage', sqsDeleteMessage);
+
+	test('before messageReceivedAndHandled', function (t) {
 		subject.on('message:received', messageReceivedHandler);
 		subject.on('message:handled', messageHandledHandler);
+		subject.on('message:deleted', messageDeletedHandler);
 		subject.on('message:error', messageErrorHandler);
+		subject.on('error', errorHandler);
 		subject.on('message:ignored', messageIgnoredHandler);
+		subject.resume();
 
+		subject.longPoll.emit('error', error);
 		subject.longPoll.emit('message:received', message);
 		Promise.delay(12).then(t.end);
 	});
+	test('longPoll.start() is called', function (t) {
+		t.plan(1);
+		t.equal(subject.longPoll.start.callCount, 1);
+	});
 	test('message:received is emitted', function (t) {
+		t.plan(1);
 		const arg = messageReceivedHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
 	});
-	test('matcher.findSingle is called', function (t) {
-		const arg = matcher.findSingle.args[0][0];
-		t.equal(arg, messagePattern);
-		t.end();
+	test('handler is called', function (t) {
+		t.plan(2);
+		const arg = handler.args[0][0];
+		t.equal(arg.pattern, message.pattern);
+		t.equal(arg.payload, message.payload);
 	});
-	test('message:ignored is emitted', function (t) {
-		const arg = messageIgnoredHandler.args[0][0];
+	test('message:ignored is not emitted', function (t) {
+		t.plan(1);
+		t.equal(messageIgnoredHandler.callCount, 0);
+	});
+	test('deleteMessage is called', function (t) {
+		t.plan(2);
+		const params = subject.sqs.deleteMessage.firstCall.args[0];
+		t.equal(params.QueueURL, subject.queueURL);
+		t.equal(params.ReceiptHandle, message.ReceiptHandle);
+	});
+	test('message:handled is emitted', function (t) {
+		t.plan(1);
+		const arg = messageHandledHandler.args[0][0];
 		t.equal(arg, messageJSON);
-		t.end();
 	});
-	test('deleteMessage is not called', function (t) {
-		t.equal(deleteMessage.callCount, 0);
-		t.end();
-	});
-	test('message:handled is not emitted', function (t) {
-		t.equal(messageHandledHandler.callCount, 0);
-		t.end();
+	test('message:deleted is emitted', function (t) {
+		t.plan(1);
+		const arg = messageDeletedHandler.args[0][0];
+		t.equal(arg, messageJSON);
 	});
 	test('message:error is not emitted', function (t) {
 		t.equal(messageErrorHandler.callCount, 0);
 		t.end();
+	});
+	test('error is emitted', function (t) {
+		t.plan(1);
+		const arg = errorHandler.args[0][0];
+		t.equal(arg, error);
 	});
 })();
