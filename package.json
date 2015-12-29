@@ -3,7 +3,7 @@
   "version"     : "0.1.0",
   "description" : "A full featured AWS transport for Oddcast.",
   "author"      : "Odd Networks Inc. (http://oddnetworks.co)",
-  "main"        : "./index.js",
+  "main"        : "./lib/oddcast-aws-transport",
   "scripts"     : {
     "lint": "xo",
     "test": "xo && tape 'test/**/*.test.js'"
@@ -18,9 +18,10 @@
     "bluebird" : "~3.1.1"
   },
   "devDependencies": {
-    "sinon"  : "~1.17.2",
-    "tape"   : "~4.4.0",
-    "xo"     : "~0.12.1"
+    "oddcast" : "1.0.0",
+    "sinon"   : "~1.17.2",
+    "tape"    : "~4.4.0",
+    "xo"      : "~0.12.1"
   },
   "bugs": {"url": "https://github.com/oddnetworks/oddcast-aws-transport/issues"},
   "license": "MIT"
