@@ -4,7 +4,13 @@ const test = require('tape');
 const sinon = require('sinon');
 const SQSLongPoll = require('../lib/sqs-long-poll');
 const queueUrl = 'http://some.domain.net/url';
-const Body = '{"pattern":1,"payload":1}';
+const Body = '{"arg":1}';
+const MessageAttributes = Object.freeze({
+	pattern: {
+		Type: 'String',
+		StringValue: '{"role":"db"}'
+	}
+});
 
 (function runTwiceWithoutError() {
 	const sqs = Object.freeze({
@@ -12,7 +18,10 @@ const Body = '{"pattern":1,"payload":1}';
 			// Call the callback async like the real thing.
 			setTimeout(function () {
 				callback(null, {
-					Messages: [{Body: Body}]
+					Messages: [{
+						Body: Body,
+						MessageAttributes: MessageAttributes
+					}]
 				});
 			}, 12);
 		})
@@ -47,7 +56,7 @@ const Body = '{"pattern":1,"payload":1}';
 		t.ok(sqs.receiveMessage.callCount >= 2, 'callCount >= 2');
 	});
 	test('receiveMessage called with parameters', function (t) {
-		t.plan(6);
+		t.plan(8);
 		const args = sqs.receiveMessage.args;
 		const paramCalls = Object.freeze(args.map(function (args) {
 			return args[0];
@@ -56,6 +65,8 @@ const Body = '{"pattern":1,"payload":1}';
 			t.equal(params.QueueUrl, queueUrl, 'params.QueueUrl');
 			t.equal(params.MaxNumberOfMessages, 1, 'params.MaxNumberOfMessages');
 			t.equal(params.WaitTimeSeconds, 20, 'params.WaitTimeSeconds');
+			t.equal(params.MessageAttributeNames[0], 'pattern',
+				'params.MessageAttributeNames');
 		});
 	});
 	test('receives messages', function (t) {

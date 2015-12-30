@@ -72,7 +72,7 @@ const SQSMessage = require('../lib/inbound-sqs-message');
 		t.equal(subject.payload.foo, 'bar');
 	});
 	test('has toJSON()', function (t) {
-		t.plan(9);
+		t.plan(10);
 		var data = subject.toJSON();
 		t.equal(data.MessageId, MessageId);
 		t.equal(data.ReceiptHandle, ReceiptHandle);
@@ -82,6 +82,79 @@ const SQSMessage = require('../lib/inbound-sqs-message');
 		t.equal(data.Attributes.SentTimestamp, Attributes.SentTimestamp);
 		t.equal(data.pattern.role, 'logging');
 		t.equal(data.payload.foo, 'bar');
+		t.equal(typeof data.MessageAttributes, 'undefined');
+		t.equal(typeof data.receive, 'undefined');
+	});
+})();
+
+(function withSNSNotification() {
+	const MessageId = '67f78cd8-e937-49f8-b768-8317dca7f5bc';
+	const ReceiptHandle = 'AQEB1p0i/F99u6VbFtt7E';
+	const MD5OfBody = '7f57108070101e8c6cfb008c8e0a206a';
+	const Body = JSON.stringify({foo: 'bar'});
+	const MessageAttributes = Object.freeze({
+		pattern: {
+			Type: 'String',
+			StringValue: '{"role":"db"}'
+		}
+	});
+	const Attributes = Object.freeze({
+		SenderId: 'ZIDAIXLAVTELUXBIEIX46',
+		ApproximateFirstReceiveTimestamp: '1448159995491',
+		ApproximateReceiveCount: '3',
+		SentTimestamp: '1448157199780'
+	});
+
+	const subject = SQSMessage.create({
+		MessageId: MessageId,
+		ReceiptHandle: ReceiptHandle,
+		MD5OfBody: MD5OfBody,
+		Body: Body,
+		MessageAttributes: MessageAttributes,
+		Attributes: Attributes
+	});
+
+	test('has MessageId', function (t) {
+		t.plan(1);
+		t.equal(subject.MessageId, MessageId);
+	});
+	test('has ReceiptHandle', function (t) {
+		t.plan(1);
+		t.equal(subject.ReceiptHandle, ReceiptHandle);
+	});
+	test('has MD5OfBody', function (t) {
+		t.plan(1);
+		t.equal(subject.MD5OfBody, MD5OfBody);
+	});
+	test('has Body', function (t) {
+		t.plan(1);
+		t.equal(subject.Body, Body);
+	});
+	test('has Attributes', function (t) {
+		t.plan(2);
+		t.equal(subject.Attributes.SenderId, Attributes.SenderId);
+		t.equal(subject.Attributes.SentTimestamp, Attributes.SentTimestamp);
+	});
+	test('has pattern', function (t) {
+		t.plan(1);
+		t.equal(subject.pattern.role, 'db');
+	});
+	test('has payload', function (t) {
+		t.plan(1);
+		t.equal(subject.payload.foo, 'bar');
+	});
+	test('has toJSON()', function (t) {
+		t.plan(10);
+		var data = subject.toJSON();
+		t.equal(data.MessageId, MessageId);
+		t.equal(data.ReceiptHandle, ReceiptHandle);
+		t.equal(data.MD5OfBody, MD5OfBody);
+		t.equal(data.Body, Body);
+		t.equal(data.Attributes.SenderId, Attributes.SenderId);
+		t.equal(data.Attributes.SentTimestamp, Attributes.SentTimestamp);
+		t.equal(data.pattern.role, 'db');
+		t.equal(data.payload.foo, 'bar');
+		t.equal(typeof data.MessageAttributes, 'undefined');
 		t.equal(typeof data.receive, 'undefined');
 	});
 })();
