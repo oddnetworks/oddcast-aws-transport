@@ -12,7 +12,7 @@ const Body = '{"pattern":1,"payload":1}';
 			// Call the callback async like the real thing.
 			setTimeout(function () {
 				callback(null, {
-					Body: Body
+					Messages: [{Body: Body}]
 				});
 			}, 12);
 		})
@@ -42,20 +42,20 @@ const Body = '{"pattern":1,"payload":1}';
 
 		subject.start();
 	});
-	test('receiveMessage called twice', function (t) {
+	test('receiveMessage called', function (t) {
 		t.plan(1);
-		t.equal(sqs.receiveMessage.callCount, 2);
+		t.ok(sqs.receiveMessage.callCount >= 2, 'callCount >= 2');
 	});
 	test('receiveMessage called with parameters', function (t) {
 		t.plan(6);
 		const args = sqs.receiveMessage.args;
 		const paramCalls = Object.freeze(args.map(function (args) {
 			return args[0];
-		}));
+		}).slice(0, 2));
 		paramCalls.forEach(function (params) {
-			t.equal(params.QueueUrl, queueUrl);
-			t.equal(params.MaxNumberOfMessages, 1);
-			t.equal(params.WaitTimeSeconds, 20);
+			t.equal(params.QueueUrl, queueUrl, 'params.QueueUrl');
+			t.equal(params.MaxNumberOfMessages, 1, 'params.MaxNumberOfMessages');
+			t.equal(params.WaitTimeSeconds, 20, 'params.WaitTimeSeconds');
 		});
 	});
 	test('receives messages', function (t) {
