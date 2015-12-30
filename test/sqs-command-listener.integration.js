@@ -3,7 +3,7 @@
 const test = require('tape');
 const sinon = require('sinon');
 const oddcast = require('oddcast');
-const awsTransport = require('../lib/');
+const awsTransport = require('../lib/oddcast-aws-transport');
 
 const ACCESS_KEY_ID = process.env.ACCESS_KEY_ID;
 const SECRET_ACCESS_KEY = process.env.SECRET_ACCESS_KEY;
@@ -32,48 +32,69 @@ if (!QUEUE_URL) {
 	process.exit(1);
 }
 
-(function eventsToQueue() {
-	const broadcaster = oddcast.eventChannel();
-	const queueA = oddcast.commandChannel();
-	const queueB = oddcast.commandChannel();
+(function commandOriginatedMessage() {
+	const paylaod = {
+		id: '123'
+	};
 
-	const broadcastEmitter = awsTransport.snsBroadcastEmitter({
-		topicArn: TOPIC_ARN,
+	const readTransport = awsTransport.sqsCommandListener({
+		queueUrl: QUEUE_URL,
 		region: REGION,
 		accessKeyId: ACCESS_KEY_ID,
 		secretAccessKey: SECRET_ACCESS_KEY
 	});
 
-	const commandListener = awsTransport.sqsCommandListener({
-		queueURL: QUEUE_URL,
+	const writeTransport = awsTransport.sqsCommandEmitter({
+		queueUrl: QUEUE_URL,
 		region: REGION,
 		accessKeyId: ACCESS_KEY_ID,
 		secretAccessKey: SECRET_ACCESS_KEY
 	});
 
-	broadcaster.use({role: 'stateChange'}, broadcastEmitter);
-	queueA.use({role: 'stateChange', type: 'Players'}, commandListener);
-	queueB.use({role: 'stateChange', type: 'Topics'}, commandListener);
+	const receiveChannel = oddcast.commandChannel();
+	const sendChannel = oddcast.commandChannel();
 
-	const onUpdate = sinon.spy();
-	const onDelete = sinon.spy();
+	const readErrorHandler = sinon.spy();
+	const writeErrorHandler = sinon.spy();
 
-	test('before eventsToQueue', function (t) {
-		let callCount = 0;
+	const messageHandler = sinon.spy();
 
-		// End the test setup once we have a total of 4 callbacks
-		function onStateChange() {
-			callCount += 1;
-			if (callCount >= 4) {
-				t.end();
-			}
-		}
-		queueA.receive({role: 'stateChange'}, onStateChange);
-		queueB.receive({role: 'stateChange'}, onStateChange);
+	test('before all commandOriginatedMessage', function (t) {
+		readTransport.on('error', readErrorHandler);
+		writeTransport.on('error', writeErrorHandler);
 
-		queueA.receive({operation: 'update'}, onUpdate);
-		queueA.receive({operation: 'delete'}, onDelete);
-		queueB.receive({operation: 'update'}, onUpdate);
-		queueB.receive({operation: 'delete'}, onDelete);
+		readTransport.on('error', function () {
+			t.end();
+		});
+		writeTransport.on('error', function () {
+			t.end();
+		});
+		readTransport.on('message:deleted', function () {
+			t.end();
+		});
+
+		receiveChannel.use({role: 'test'}, readTransport);
+		sendChannel.use({role: 'test'}, writeTransport);
+
+		// Setup the receive handler.
+		receiveChannel.receive({role: 'test'}, messageHandler);
+
+		// Send the command.
+		sendChannel.send({role: 'test', cmd: 'command:message'}, paylaod);
+	});
+
+	test('read error handler is not called', function (t) {
+		t.plan(1);
+		t.equal(readErrorHandler.callCount, 0);
+	});
+
+	test('write error handler is not called', function (t) {
+		t.plan(1);
+		t.equal(writeErrorHandler.callCount, 0);
+	});
+
+	test('after all commandOriginatedMessage', function (t) {
+		readTransport.close();
+		t.end();
 	});
 })();
