@@ -1,18 +1,21 @@
 var AWS = require('aws-sdk');
 
-console.error('key: %s', process.env.AWS_ACCESS_KEY_ID);
-console.error('secret: %s', process.env.AWS_SECRET_ACCESS_KEY);
+console.error('key: %s', process.env.ACCESS_KEY_ID);
+console.error('secret: %s', process.env.SECRET_ACCESS_KEY);
 
 var sqs = new AWS.SQS({
 	apiVersion: '2012-11-05',
-	region: 'us-west-2'
+	region: 'us-west-2',
+	accessKeyId: process.env.ACCESS_KEY_ID,
+	secretAccessKey: process.env.SECRET_ACCESS_KEY
 });
 
 var options = {
 	QueueUrl: 'https://sqs.us-west-2.amazonaws.com/654728787792/experimental',
 	WaitTimeSeconds: 5,
 	MaxNumberOfMessages: 1,
-	AttributeNames: ['All']
+	AttributeNames: ['All'],
+	MessageAttributeNames: ['pattern']
 };
 
 sqs.receiveMessage(options, function (err, res) {
