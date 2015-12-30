@@ -3,7 +3,7 @@
 const test = require('tape');
 const sinon = require('sinon');
 const SQSLongPoll = require('../lib/sqs-long-poll');
-const queueURL = 'http://some.domain.net/url';
+const queueUrl = 'http://some.domain.net/url';
 const Body = '{"pattern":1,"payload":1}';
 
 (function runTwiceWithoutError() {
@@ -20,7 +20,7 @@ const Body = '{"pattern":1,"payload":1}';
 	const errorHandler = sinon.spy();
 	const subject = SQSLongPoll.create({
 		sqs: sqs,
-		queueURL: queueURL
+		queueUrl: queueUrl
 	});
 	const messages = [];
 
@@ -53,7 +53,7 @@ const Body = '{"pattern":1,"payload":1}';
 			return args[0];
 		}));
 		paramCalls.forEach(function (params) {
-			t.equal(params.QueueURL, queueURL);
+			t.equal(params.QueueUrl, queueUrl);
 			t.equal(params.MaxNumberOfMessages, 1);
 			t.equal(params.WaitTimeSeconds, 20);
 		});
@@ -94,7 +94,7 @@ const Body = '{"pattern":1,"payload":1}';
 	const messageReceivedHandler = sinon.spy();
 	const subject = SQSLongPoll.create({
 		sqs: sqs,
-		queueURL: queueURL
+		queueUrl: queueUrl
 	});
 	const errors = [];
 

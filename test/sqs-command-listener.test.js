@@ -18,7 +18,7 @@ const message = Object.freeze({
 
 (function messageReceivedAndHandled() {
 	const subject = SQSCommandListener.create({
-		queueURL: 'foo',
+		queueUrl: 'foo',
 		region: 'foo',
 		accessKeyId: 'foo',
 		secretAccessKey: 'foo'
@@ -75,7 +75,7 @@ const message = Object.freeze({
 	test('deleteMessage is called', function (t) {
 		t.plan(2);
 		const params = subject.sqs.deleteMessage.firstCall.args[0];
-		t.equal(params.QueueURL, subject.queueURL);
+		t.equal(params.QueueUrl, subject.queueUrl);
 		t.equal(params.ReceiptHandle, message.ReceiptHandle);
 	});
 	test('message:handled is emitted', function (t) {
@@ -100,7 +100,7 @@ const message = Object.freeze({
 
 (function messageReceivedAndNotHandled() {
 	const subject = SQSCommandListener.create({
-		queueURL: 'foo',
+		queueUrl: 'foo',
 		region: 'foo',
 		accessKeyId: 'foo',
 		secretAccessKey: 'foo'
@@ -183,7 +183,7 @@ const message = Object.freeze({
 		return Promise.reject(error);
 	});
 	const subject = SQSCommandListener.create({
-		queueURL: 'foo',
+		queueUrl: 'foo',
 		region: 'foo',
 		accessKeyId: 'foo',
 		secretAccessKey: 'foo'
@@ -259,7 +259,7 @@ const message = Object.freeze({
 		return Promise.resolve(true);
 	});
 	const subject = SQSCommandListener.create({
-		queueURL: 'foo',
+		queueUrl: 'foo',
 		region: 'foo',
 		accessKeyId: 'foo',
 		secretAccessKey: 'foo'
@@ -314,7 +314,7 @@ const message = Object.freeze({
 	test('deleteMessage is called', function (t) {
 		t.plan(2);
 		const params = subject.sqs.deleteMessage.firstCall.args[0];
-		t.equal(params.QueueURL, subject.queueURL);
+		t.equal(params.QueueUrl, subject.queueUrl);
 		t.equal(params.ReceiptHandle, message.ReceiptHandle);
 	});
 	test('message:handled is emitted', function (t) {
