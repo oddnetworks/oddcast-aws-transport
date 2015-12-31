@@ -111,10 +111,86 @@ if (!QUEUE_URL) {
 		t.plan(1);
 		t.equal(messageDeletedHandler.callCount, 1);
 	});
+})();
 
-	test('after all commandOriginatedMessage', function (t) {
-		readTransport.close();
-		t.end();
+(function eventOriginatedMessage() {
+	const paylaod = {
+		id: 'event_success'
+	};
+
+	const readTransport = awsTransport.sqsCommandListener({
+		queueUrl: QUEUE_URL,
+		region: REGION,
+		accessKeyId: ACCESS_KEY_ID,
+		secretAccessKey: SECRET_ACCESS_KEY
+	});
+
+	const writeTransport = awsTransport.snsBroadcastEmitter({
+		topicArn: TOPIC_ARN,
+		region: REGION,
+		accessKeyId: ACCESS_KEY_ID,
+		secretAccessKey: SECRET_ACCESS_KEY
+	});
+
+	const receiveChannel = oddcast.commandChannel();
+	const broadcastChannel = oddcast.commandChannel();
+
+	const readErrorHandler = sinon.spy();
+	const writeErrorHandler = sinon.spy();
+
+	const messageHandler = sinon.spy();
+	const messageDeletedHandler = sinon.spy();
+
+	test('before all eventOriginatedMessage', function (t) {
+		readTransport.on('error', readErrorHandler);
+		writeTransport.on('error', writeErrorHandler);
+
+		readTransport.on('error', function () {
+			t.end();
+		});
+		writeTransport.on('error', function () {
+			t.end();
+		});
+
+		readTransport.on('message:deleted', messageDeletedHandler);
+		readTransport.on('message:deleted', function () {
+			readTransport.close();
+		});
+
+		receiveChannel.use({role: 'test'}, readTransport);
+		broadcastChannel.use({role: 'test'}, writeTransport);
+
+		// Setup the receive handler.
+		receiveChannel.receive({role: 'test', cmd: 'command:message'}, messageHandler);
+
+		readTransport.on('close', function () {
+			t.end();
+		});
+
+		// Send the command.
+		broadcastChannel.broadcast({role: 'test', cmd: 'command:message'}, paylaod);
+	});
+
+	test('read error handler is not called', function (t) {
+		t.plan(1);
+		t.equal(readErrorHandler.callCount, 0);
+	});
+
+	test('write error handler is not called', function (t) {
+		t.plan(1);
+		t.equal(writeErrorHandler.callCount, 0);
+	});
+
+	test('got message paylaod', function (t) {
+		t.plan(2);
+		const args = messageHandler.args[0][0];
+		t.ok(typeof paylaod.id !== 'undefined', 'paylaod is present');
+		t.equal(args.id, paylaod.id);
+	});
+
+	test('message:deleted is called only once', function (t) {
+		t.plan(1);
+		t.equal(messageDeletedHandler.callCount, 1);
 	});
 })();
 
@@ -223,10 +299,5 @@ if (!QUEUE_URL) {
 	test('message:deleted is called only once', function (t) {
 		t.plan(1);
 		t.equal(messageDeletedHandler.callCount, 1);
-	});
-
-	test('after all commandOriginatedMessage', function (t) {
-		readTransport.close();
-		t.end();
 	});
 })();
