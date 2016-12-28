@@ -4,6 +4,6 @@ An event broadcast and queue transport for [Oddcast](https://github.com/oddnetwo
 
 Copyright and License
 ---------------------
-Copyright: (c) 2015 by Odd Networks Inc. (http://oddnetworks.co)
+Copyright (c) 2017 Oddnetworks Inc. (https://www.oddnetworks.com).
 
 Unless otherwise indicated, all source code is licensed under the MIT license. See MIT-LICENSE for details.
