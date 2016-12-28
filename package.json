@@ -6,7 +6,7 @@
   "main"        : "./lib/oddcast-aws-transport",
   "scripts"     : {
     "lint": "xo",
-    "test": "xo && tape 'test/**/*.test.js'"
+    "test": "xo"
   },
   "repository"  : {
     "type" : "git",
@@ -14,14 +14,11 @@
   },
   "homepage": "https://github.com/oddnetworks/oddcast-aws-transport/",
   "dependencies": {
-    "aws-sdk"  : "~2.2.26",
-    "bluebird" : "~3.1.1"
+    "aws-sdk"  : "~2.7.0",
+    "bluebird" : "~3.4.7"
   },
   "devDependencies": {
-    "oddcast" : "~1.0.1",
-    "sinon"   : "~1.17.2",
-    "tape"    : "~4.4.0",
-    "xo"      : "~0.12.1"
+    "xo"      : "~0.17.0"
   },
   "bugs": {"url": "https://github.com/oddnetworks/oddcast-aws-transport/issues"},
   "license": "MIT"
