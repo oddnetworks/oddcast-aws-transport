@@ -1,0 +1,26 @@
+// POST /foo-fighters
+// host: ec2-54-172-10-179.compute-1.amazonaws.com
+// x-forwarded-for: 72.21.217.67
+// connection: close
+// content-length: 1596
+// x-amz-sns-message-type: SubscriptionConfirmation
+// x-amz-sns-message-id: b43af58e-40c6-4605-95ef-c49faf83d52c
+// x-amz-sns-topic-arn: arn:aws:sns:us-east-1:654728787792:oddcast-testing
+// content-type: text/plain; charset=UTF-8
+// user-agent: Amazon Simple Notification Service Agent
+// cookie: cfid=83f0fa4e-eaba-44a6-8065-895c1777def6; cftoken=0
+// accept-encoding: gzip,deflate
+// SubscriptionConfirmation SubscribeURL: https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn:aws:sns:us-east-1:654728787792:oddcast-testing&Token=2336412f37fb687f5d51e6e241d44a2dc35644bdd06004723d252a611dd4c5b5d5f6e501a3581ad5e17d7ba4e567acc2370c12b710791d6930af370efa19a070ee7ac16c179a8ec458a94be18fd859a7c242b3b2bc9a67026ad5dd555c8244948ceeabca8b39f1e4b3c7f8768ca7153fa23688a56bec202c92abc0e1f3b8abd2
+
+{
+  "Type": "SubscriptionConfirmation",
+  "MessageId": "b43af58e-40c6-4605-95ef-c49faf83d52c",
+  "Token": "2336412f37fb687f5d51e6e241d44a2dc35644bdd06004723d252a611dd4c5b5d5f6e501a3581ad5e17d7ba4e567acc2370c12b710791d6930af370efa19a070ee7ac16c179a8ec458a94be18fd859a7c242b3b2bc9a67026ad5dd555c8244948ceeabca8b39f1e4b3c7f8768ca7153fa23688a56bec202c92abc0e1f3b8abd2",
+  "TopicArn": "arn:aws:sns:us-east-1:654728787792:oddcast-testing",
+  "Message": "You have chosen to subscribe to the topic arn:aws:sns:us-east-1:654728787792:oddcast-testing.\nTo confirm the subscription, visit the SubscribeURL included in this message.",
+  "SubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription&TopicArn=arn:aws:sns:us-east-1:654728787792:oddcast-testing&Token=2336412f37fb687f5d51e6e241d44a2dc35644bdd06004723d252a611dd4c5b5d5f6e501a3581ad5e17d7ba4e567acc2370c12b710791d6930af370efa19a070ee7ac16c179a8ec458a94be18fd859a7c242b3b2bc9a67026ad5dd555c8244948ceeabca8b39f1e4b3c7f8768ca7153fa23688a56bec202c92abc0e1f3b8abd2",
+  "Timestamp": "2016-12-28T22:00:28.760Z",
+  "SignatureVersion": "1",
+  "Signature": "Gw48B7/svxg+FeUpPk04tKwRouKi2gMoxREHA56Ut4Lu2kpjN2O7W/3xBqTznNX98IPL1HZzKOZoeepWGH7mCUNEQ9yggY0TqbJC4APH3WCsjZUXo/ektATKulSpY5r7+ctOumH3vTw6Sb5M8NRTIxwf/X/tsTKpz/xhzZkCKrXbWBjumzC4vLoRGhKbPTdUmA/LTWv9wmCWB4Lthg818FniLazAMfS3jGrNxtAUdirGN4BmdV+9dk9TuDwhR3vSqsbpquQpfM2x2QsAT6au3nZjWCC4yL8d7bTn0Wz3AAwQZrUPsF14kNVshRobxaYdyplCfDbBCbNhW2jR3Tyv3A==",
+  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-b95095beb82e8f6a046b3aafc7f4149a.pem"
+}

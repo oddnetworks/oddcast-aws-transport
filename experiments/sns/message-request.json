@@ -1,0 +1,32 @@
+// POST /foo-fighters
+// host: ec2-54-172-10-179.compute-1.amazonaws.com
+// x-forwarded-for: 72.21.217.139
+// connection: close
+// content-length: 1059
+// x-amz-sns-message-type: Notification
+// x-amz-sns-message-id: 319a7f8f-d960-51d7-b69f-2f51e303c8e5
+// x-amz-sns-topic-arn: arn:aws:sns:us-east-1:654728787792:oddcast-testing
+// x-amz-sns-subscription-arn: arn:aws:sns:us-east-1:654728787792:oddcast-testing:dd29c388-7a1d-437a-b260-943e8add3d52
+// content-type: text/plain; charset=UTF-8
+// user-agent: Amazon Simple Notification Service Agent
+// cookie: cfid=8fdd8fb6-92e1-4c6f-97d5-aa0d2a46b0bd; cftoken=0
+// accept-encoding: gzip,deflate
+// Notification MessageId: 319a7f8f-d960-51d7-b69f-2f51e303c8e5
+
+{
+  "Type": "Notification",
+  "MessageId": "319a7f8f-d960-51d7-b69f-2f51e303c8e5",
+  "TopicArn": "arn:aws:sns:us-east-1:654728787792:oddcast-testing",
+  "Message": "{\"foo\":\"bar\",\"timestamp\":1482962978918}",
+  "Timestamp": "2016-12-28T22:09:39.277Z",
+  "SignatureVersion": "1",
+  "Signature": "k5q/ZJDYbRN0Aja+YoT8H/nuCfH35jOpBr8fSh+Oc+RcclbVbXm1ZEiajN3V4JzclQAzmhPY8d02sYo8a4+NWhie9SdzwmTkPbDMXs14mGAo5vVDDBYMAJySf8yguIkUo8syX8Wfqg4ft2Fu7xAdrrdSyLjL37zHR4LZj2ar5JZ6MThjlt4Rn+ssZYc04v+FjJOq0bvCgVmBBpc6jjEykfq7honPlhvoZ7HgPLUG0f9UGBSfzsWc4T9x9nCcFfl5avV/6CjxYhjrQ1FCjW5Jd1MTHXoTD+AEyXr3VB0ldx6muvKDkZb93jCbDfkU0bcFjlDDZ9hge3jRYajOooJ19A==",
+  "SigningCertURL": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-b95095beb82e8f6a046b3aafc7f4149a.pem",
+  "UnsubscribeURL": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:654728787792:oddcast-testing:dd29c388-7a1d-437a-b260-943e8add3d52",
+  "MessageAttributes": {
+    "pattern": {
+      "Type": "String",
+      "Value": "{\"role\":\"messages\"}"
+    }
+  }
+}
