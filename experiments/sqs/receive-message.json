@@ -1,0 +1,15 @@
+{
+  "MessageId": "0992f1c2-c134-4e75-9a18-482ec4498fe7",
+  "ReceiptHandle": "AQEB46vi1S4CakyJ1l58Q0/Ue7tSruI9NqS/H1R1Ek/0tUA38WMiXYTMhC4nQPrYa3Q8xZCo3AteyRwpyTrQebP6FzaefL53ReJkQtRtz/3OH3pbOj8+EqbymW+FmQfTVwXDsp/uoeimRTQt8ygPH+kQ7Tpqyai005D0cLUa+3d2slEIgEdOAg/svD092ADLrDpZjLDyLB8PmPlmlOJTDNR3x2GyeNW1kWvxtsbFBQQApmnVYoKcZU6vu4MvP9PyVMw5P0h5W8FjlFXBaZh7r5vHA1tUT7uj/2OCmMLBT5q3/7ULo9ohFUSuq6U7pBp2gzsio+HaGBIV8rz2UVzsJWTXLhbpzrjhpIqt+YcWDszvYge3pB5emXWNUlxUVKj91q5u",
+  "MD5OfBody": "fca3de80776287f169d850d69ed277c9",
+  "Body": "{\"rid\":15}",
+  "MD5OfMessageAttributes": "9ba4e6d194a3dea64ba996551ad4a9a9",
+  "MessageAttributes": {
+    "pattern": {
+      "StringValue": "{\"role\":\"scheduler\"}",
+      "StringListValues": [],
+      "BinaryListValues": [],
+      "DataType": "String"
+    }
+  }
+}

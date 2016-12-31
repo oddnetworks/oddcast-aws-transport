@@ -1,45 +1,51 @@
-var AWS = require('aws-sdk');
+'use strict';
 
-console.error('key: %s', process.env.ACCESS_KEY_ID);
-console.error('secret: %s', process.env.SECRET_ACCESS_KEY);
+const AWS = require('aws-sdk');
 
-var sqs = new AWS.SQS({
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_REGION = process.env.AWS_REGION;
+
+const QUEUE_URL = process.argv[2];
+
+if (!AWS_ACCESS_KEY_ID) {
+	throw new Error('Missing env var AWS_ACCESS_KEY_ID');
+}
+if (!AWS_SECRET_ACCESS_KEY) {
+	throw new Error('Missing env var AWS_SECRET_ACCESS_KEY');
+}
+if (!AWS_REGION) {
+	throw new Error('Missing env var AWS_REGION');
+}
+if (!QUEUE_URL) {
+	throw new Error('missing argv for Queue URL');
+}
+
+const sqs = new AWS.SQS({
 	apiVersion: '2012-11-05',
-	region: 'us-west-2',
-	accessKeyId: process.env.ACCESS_KEY_ID,
-	secretAccessKey: process.env.SECRET_ACCESS_KEY
+	region: AWS_REGION,
+	accessKeyId: AWS_ACCESS_KEY_ID,
+	secretAccessKey: AWS_SECRET_ACCESS_KEY
 });
 
-var options = {
-	QueueUrl: 'https://sqs.us-west-2.amazonaws.com/654728787792/experimental',
+const options = {
+	QueueUrl: QUEUE_URL,
 	MessageBody: JSON.stringify({rid: Math.round(Math.random() * 100)}),
 	MessageAttributes: {
 		pattern: {
 			DataType: 'String',
-			StringValue: JSON.stringify({channel: 'command'})
+			StringValue: JSON.stringify({role: 'scheduler'})
 		}
 	}
 };
 
-sqs.sendMessage(options, function (err, res) {
-	if (err && err.message === 'CrendentialsError') {
-		console.error('Missing crendentials');
-		return;
-	}
+sqs.sendMessage(options, (err, res) => {
 	if (err) {
 		console.error(err.stack || err.message || err);
 		return;
 	}
 
-	// res
-	// {
-	//   MessageId: '453d606f-0c07-4cd4-add8-bcb13a2f3ac9',
-	//   ResponseMetadata: { RequestId: 'f924d2dc-46a6-5a45-a7de-9c576209f95e' },
-	//   MD5OfMessageBody: '644e3f292b320d2e43a9fab68dd1ca76',
-	//   MD5OfMessageAttributes: 'cc973e8dfa259baf3369663dce9acbc2'
-	// }
-
-	console.log(res.MessageId);
+	console.log(JSON.stringify(res, null, 2));
 });
 
 console.error('executed');
