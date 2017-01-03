@@ -13,13 +13,15 @@ const SQS_OPTIONS = {
 	QueueUrl: '',
 	WaitTimeSeconds: null,
 	MaxNumberOfMessages: null,
-	pollingInterval: null
+	pollingInterval: 1
 };
+
+const SQS_TRANSPORT = AWSTransport.sqsTransport(SQS_OPTIONS);
 
 describe('with oddcast bus', function () {
 	const componentA = {
 		bus: oddcast.bus(),
-		sqs: AWSTransport.sqsTransport(SQS_OPTIONS),
+		sqs: SQS_TRANSPORT,
 		sns: AWSTransport.snsTransport({
 			server: {
 				hostname: 'localhost',
@@ -63,7 +65,7 @@ describe('with oddcast bus', function () {
 
 	const componentB = {
 		bus: oddcast.bus(),
-		sqs: AWSTransport.sqsTransport(SQS_OPTIONS),
+		sqs: SQS_TRANSPORT,
 		sns: AWSTransport.snsTransport({
 			server: {
 				hostname: 'localhost',
@@ -137,7 +139,7 @@ describe('with oddcast bus', function () {
 
 	const componentC = {
 		bus: oddcast.bus(),
-		sqs: AWSTransport.sqsTransport(SQS_OPTIONS),
+		sqs: SQS_TRANSPORT,
 		sns: AWSTransport.snsTransport({
 			server: {
 				hostname: 'localhost',
@@ -244,6 +246,7 @@ describe('with oddcast bus', function () {
 
 			// Initialize all the components.
 			.then(() => {
+				console.log('initialize all components');
 				return Promise.all(components.map(comp => {
 					return comp.initialize();
 				}));
@@ -251,8 +254,15 @@ describe('with oddcast bus', function () {
 
 			// Send all the setVideo commands
 			.then(() => {
+				console.log('send all the setVideo commands');
 				return Promise.all(videos.map(item => {
-					return componentA.bus.sendCommand({role: 'catalog', cmd: 'setVideo'}, item);
+					return componentA.bus.sendCommand({role: 'catalog', cmd: 'setVideo'}, item).then(res => {
+						console.log(`result ${item.id}:`, res);
+						return null;
+					}).catch(err => {
+						console.log(`ERROR ${item.id}:`, err.message);
+						return null;
+					});
 				}));
 			})
 
