@@ -188,7 +188,7 @@ describe('with oddcast bus', function () {
 			});
 		},
 
-		handler(payload) {
+		commandHandler(payload) {
 			this.payloads.push(payload);
 			if (!this.error && payload.errorMessage) {
 				throw new Error(payload.errorMessage);
