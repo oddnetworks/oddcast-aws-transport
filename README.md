@@ -1,6 +1,6 @@
 Oddcast AWS Transport
 =====================
-An event broadcast and queue transport for [Oddcast](https://github.com/oddnetworks/oddcast) using Amazon [SNS](http://aws.amazon.com/documentation/sns/) and [SQS](https://aws.amazon.com/documentation/sqs/).
+An event broadcast and queue transport for [Oddcast](https://gitlab.com/oddnetworks/oddworks/oddcast) using Amazon [SNS](http://aws.amazon.com/documentation/sns/) and [SQS](https://aws.amazon.com/documentation/sqs/).
 
 __WORK IN PROGRESS__
 

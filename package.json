@@ -1,8 +1,8 @@
 {
   "name": "oddcast-aws-transport",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A full featured AWS transport for Oddcast.",
-  "author": "Odd Networks Inc. (http://oddnetworks.co)",
+  "author": "Odd Networks Inc. (http://oddnetworks.com)",
   "main": "./lib/oddcast-aws-transport",
   "scripts": {
     "lint": "xo",
@@ -10,9 +10,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/oddnetworks/oddcast-aws-transport.git"
+    "url": "https://gitlab.com/oddnetworks/oddworks/oddcast-aws-transport.git"
   },
-  "homepage": "https://github.com/oddnetworks/oddcast-aws-transport/",
+  "homepage": "https://gitlab.com/oddnetworks/oddworks/oddcast-aws-transport/",
   "dependencies": {
     "aws-sdk": "~2.7.0",
     "bluebird": "~3.4.0"
@@ -23,7 +23,7 @@
     "xo": "~0.17.0"
   },
   "bugs": {
-    "url": "https://github.com/oddnetworks/oddcast-aws-transport/issues"
+    "url": "https://gitlab.com/oddnetworks/oddworks/oddcast-aws-transport/issues"
   },
   "xo": {
     "esnext": true,
